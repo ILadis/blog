@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../styles.css">
+  <title>How to update the firmware of 8BitDo's gamepads without using Upgrade Tools</title>
+</head>
+<body>
+  <header>
+    <h1>ladis.cloud - blog</h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="https://github.com/ILadis">GitHub</a>
+    </nav>
+  </header>
+  <article>
+    <time datetime="2021-06-26">June 27, 2021</time>
+    <h1>How to update the firmware of 8BitDo's gamepads without using Upgrade Tools</h1>
+    <p>Before continue reading I would like to point out, that this guide is targeted to linux based operating systems.</p>
+    <p>In the past 8BitDo offered the firmware files for their gamepads as downlodable ZIP archives on their
+      <a href="https://support.8bitdo.com/">support site</a>. But for their more recent versions, the <em>Upgrade Tool</em> is
+      required in order to download and flash the firmware onto their gamepads. Unfortunately there is no native linux version
+      of the <em>Upgrade Tool</em> available as of today.</p>
+    <p>If you want to know how to still download and flash their latest firmware versions continue reading.</p>
+    <h2>Download the firmware file</h2>
+    <p>First get a listing of the available firmware files. To do this, issue a HTTP POST request to 8BitDo's new download API.
+      An additional header my be used to filter for a specific gamepad.<br>
+      For example:</p>
+    <pre><code>$ curl -X POST -H 'Type: 9' -H 'Beta: 1' http://dl.8bitdo.com:8080/firmware/select</code></pre>
+    <p>The following table shows the currently available gamepad types:</p>
+    <table>
+      <tr>
+        <th>Gamepad</th>
+        <th>Type</th>
+      </tr>
+      <tr>
+        <td>Arcade Stick</td>
+        <td>34</td>
+      </tr>
+      <tr>
+        <td>Arcade Stick Receiver</td>
+        <td>35</td>
+      </tr>
+      <tr>
+        <td>F30 GamePad</td>
+        <td>2</td>
+      </tr>
+      <tr>
+        <td>F30 Arcade Stick</td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td>F30 Pro</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <td>Lite GamePad</td>
+        <td>28</td>
+      </tr>
+      <tr>
+        <td>M30</td>
+        <td>23</td>
+      </tr>
+      <tr>
+        <td>N30 GamePad</td>
+        <td>2, 10</td>
+      </tr>
+      <tr>
+        <td>N30 NS GamePad</td>
+        <td>18</td>
+      </tr>
+      <tr>
+        <td>N30 Pro</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <td>N30 Pro 2</td>
+        <td>13</td>
+      </tr>
+      <tr>
+        <td>Pro 2</td>
+        <td>33</td>
+      </tr>
+      <tr>
+        <td>Pro 2 Wired</td>
+        <td>37</td>
+      </tr>
+      <tr>
+        <td>SF30 Pro</td>
+        <td>9</td>
+      </tr>
+      <tr>
+        <td>SN30 GamePad</td>
+        <td>3, 17</td>
+      </tr>
+      <tr>
+        <td>SN30 Pro+</td>
+        <td>25</td>
+      </tr>
+      <tr>
+        <td>SN30 Pro</td>
+        <td>9</td>
+      </tr>
+    </table>
+    <p>The download API will send a JSON that will look like this:</p>
+    <pre><code>{
+  "msgState": 1,
+  "error": "",
+  "list": [{
+    "date": "2021-04-19",
+    "fileName": "SN30pro+SF30pro",
+    "type": 9,
+    "version": 1.3600000143051147,
+    "winDownload": 8725,
+    "fileSize": 89116,
+    "filePathName": "/firmwareFile/upload/cab12b12-8e01-472f-a9f4-ec2237c598b9.dat",
+    "beta": "",
+    "md5": "78F7D5CCCA6C2FD6A9644616BD3E7F52"
+  }, {
+    ...
+  }]
+}</code></pre>
+    <p>The <code>filePathName</code> property contains the path name of the firmware file we need to download.<br>
+      Make sure to choose the correct version:</p>
+    <pre><code>$ curl -X GET -O http://dl.8bitdo.com:8080/firmwareFile/upload/cab12b12-8e01-472f-a9f4-ec2237c598b9.dat</code></pre>
+    <h2>Flashing the firmware file on the gamepad</h2>
+    <p>The <code>fwupd</code> tool is required to flash the firmware files on 8BitDo's gamepads. Start your gamepad by holding
+      down L(1)+R(1)+START for 3 seconds. A status LED on the gamepad should now blink red. Then connect the gamepad to the
+      computer with a USB cable.</p>
+    <p>The gamepad should now show up in the <code>fwupd</code> tool:</p>
+    <pre><code>$ fwupdmgr get-devices
+├─ 8Bitdo:
+│     Device ID:          23ec719b6aabc2d2dac5176c232f0da7a21881b0
+│     Summary:            A redesigned classic game controller
+│     Current version:    1.34
+│     Vendor:             8BitDo
+│     Device Flags:       • Updatable
+│                         • Is in bootloader mode
+...</code></pre>
+    <p>The device id is then used to flash the firmware file on this gamepad:</p>
+    <pre><code>$ fwupdtool install-blob cab12b12-8e01-472f-a9f4-ec2237c598b9.dat 23ec719b6aabc2d2dac5176c232f0da7a21881b0</code></pre>
+    <p>The <code>fwupd</code> tool may fail to restart the gamepad after writing the firmware. If it times out, restart the
+      gamepad and verify that the firmware was updated correctly.</p>
+  </article>
+</body>
+</html>

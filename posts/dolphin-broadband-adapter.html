@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../styles.css">
+  <title>How to setup dolphin broadband adapter for local area multiplayer</title>
+</head>
+<body>
+  <header>
+    <h1>ladis.cloud - blog</h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="https://github.com/ILadis">GitHub</a>
+    </nav>
+  </header>
+  <article>
+    <time datetime="2021-06-26">June 26, 2021</time>
+    <h1>How to setup dolphin broadband adapter for local area multiplayer</h1>
+    <p>Before continue reading I would like to point out, that this guide is targeted to linux based operating systems.</p>
+    <p>So, there exists an <a href="https://wiki.dolphin-emu.org/index.php?title=Broadband_Adapter">offical wiki page</a> which
+      <em>describes</em> the setup that is necessary for the broadband adapter to work. But at least I had some trouble
+      figuring out, what one is exactly supposed to do.</p>
+    <p>My goal was to connect two (or more) dolphin instances running on different computers on my local network and eventually
+      be able to play the LAN Mode of Mario Kart: Double Dash‼</p>
+    <p>If you want to know how I did it, continue reading.</p>
+    <h2>Setting up the TAP device and network bridge</h2>
+    <p>The <a href="https://wiki.dolphin-emu.org/index.php?title=Broadband_Adapter#With_OpenVPN.2FTunTap">official wiki page</a>
+      instructs you to install OpenVPN, but this is actually not required. What is required though, is a TAP device with a
+      specific name that is then bridged to your real network adapter.</p>
+    <p>In order to create the required network devices the <code>ip</code> tool, that is usually already installed (if not the
+      package is usually named <code>iproute2</code>), can be used. The following commands require root access, so either switch
+      to root or prepend <code>sudo</code> to every command.</p>
+    <p>First create a TAP device named <code>Dolphin0</code>. This name is important, since dolphin tries to access devices
+      labeled <code>Dolphin0</code> to <code>Dolphin31</code>. Also make sure to substitute user and group accordingly.</p>
+    <pre>
+      <code>$ ip tuntap add dev Dolphin0 mode tap user <em>user</em> group <em>group</em>
+$ ip link set dev Dolphin0 up</code>
+    </pre>
+    <p>Next create a network bridge. The name of this device is not important to dolphin, so choose as you like.<br>
+      For this example I used <code>br0</code>:</p>
+    <pre>
+      <code>$ ip link add name br0 type bridge
+$ ip link set br0 up</code>
+    </pre>
+    <p>The last step is to create a <em>bridge</em> between the TAP device and your actual network adapter. This will forward all
+      traffic to and from your network adapter to the dolphin instance. Make sure to substitute the name of your network adapter
+      accordingly (it's with certainty not named <code>eth0</code>):</p>
+    <pre>
+      <code>$ ip link set eth0 master br0
+$ ip link set Dolphin0 master br0</code>
+    </pre>
+    <p>This completes the required network setup. Repeat this on any computer in your network that is running a dolphin instance
+      you want to connect.</p>
+    <p>Note that this setup does not persist between reboots.</p>
+    <h2>Configure dolphin</h2>
+    <p>As stated in the <a href="https://wiki.dolphin-emu.org/index.php?title=Broadband_Adapter#Configure_Dolphin">official wiki
+      page</a>, enable the broadband adapter. This is done within the dolphin configuration dialog. Under GameCube > SP1 select
+      Broadband Adapter (TAP).</p>
+    <p><em>"Now you may play any games which use the broadband adapter."</em></p>
+  </article>
+</body>
+</html>
