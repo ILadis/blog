@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../styles.css">
+  <title>How to use an existing save file with Goomba Color</title>
+</head>
+<body>
+  <header>
+    <h1>ladis.cloud - blog</h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="https://github.com/ILadis">GitHub</a>
+    </nav>
+  </header>
+  <article>
+    <time datetime="2022-02-01">February 1, 2022</time>
+    <h1>How to use an existing save file with Goomba Color</h1>
+    <p>Today I wanted to transfer my save file for Pokemon - Silver Edition from my PC to the EverDrive GBA X5 and continue my playthrough on my GameBoy Advance. I found out that the save file which was initially created on an emulator (namely <a href="https://mgba.io">mGBA</a>), is not compatible with the <a href="https://www.dwedit.org/gba/goombacolor.php">Goomba Color</a> emulator that I use on the GameBoy Advance.</p>
+    <p>Fortunately there is a way to <em>convert</em> any raw save file to a Goomba Color compatible one.</p>
+    <h2>Obtain an empty save file</h2>
+    <p>First create a new save file with the Goomba Color emulator on your GameBoy Advance for the game you want to use.  After saving the game make sure to also press L+R to open the Goomba Color menu. By doing this the content of the save file is written to the SD card in your EverDrive.</p>
+    <p>Power off the GameBoy Advance, insert the SD card into your computer and mount the appropriate device node for later use.</p>
+    <h2>Convert the save file</h2>
+    <p>There is a tool called <a href="https://github.com/libertyernie/goombasav">goombasav</a> which we will use to convert any existing save file to a Goomba Color compatible one.</p>
+    <p>To do this, first clone the GitHub repository and then build the project:</p>
+    <pre><code>$ git clone git@github.com:libertyernie/goombasav.git
+$ cd goombasav
+$ make</code></pre>
+    <p>After that use the <em>replace</em> operation of <em>goombasav</em> to inject any existing savefile you already have, into the Goomba Color save file you created earlier:</p>
+    <pre><code>$ ./goombasav replace /sdcard/GBASYS/emusave/Pokemon*.srm ~/saves/Pokemon*.sav</pre></code>
+    <p>Make sure to adjust the file paths accordingly.</p>
+    <p>Now unmount the device, insert the SD card back into your EverDrive cartridge and check if the save file is working.</p>
+    <p>If you want to learn more about how Goomba Color stores save files, read <a href="https://www.lakora.us/gba/goomba/index.html">this</a>.
+  </article>
+</body>
+</html>
